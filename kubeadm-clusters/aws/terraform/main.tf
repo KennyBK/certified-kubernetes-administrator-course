@@ -30,7 +30,7 @@ output "connect_student_node" {
                   ssh ubuntu@${aws_instance.student_node.public_ip}
 
                 You should wait till all instances are fully ready in the EC2 console.
-                The Status Check colunm should contain "2/2 checks passed"
+                The Status Check colunm should contain "3/3 checks passed"
 
                 EOT
 }
