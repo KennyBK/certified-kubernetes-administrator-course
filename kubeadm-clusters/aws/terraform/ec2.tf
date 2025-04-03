@@ -57,7 +57,7 @@ resource "aws_instance" "kubenode" {
     network_interface_id = aws_network_interface.kubenode[each.value].id
   }
   root_block_device {
-    volume_size = 10
+    volume_size = 20
     volume_type = "gp2"
   }
   tags = {
