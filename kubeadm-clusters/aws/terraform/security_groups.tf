@@ -53,7 +53,7 @@ resource "aws_security_group" "student_node" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [
-      "18.206.107.24/29"
+      "3.0.5.32/29"
     ]
   }
 }
