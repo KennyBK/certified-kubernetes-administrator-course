@@ -49,12 +49,16 @@ resource "aws_network_interface" "kubenode" {
 # all nodes in /etc/hosts
 resource "aws_instance" "kubenode" {
   for_each      = toset(local.instances)
-  ami           = data.aws_ami.ubuntu.image_id
+  ami           = data.aws_ami.debian.image_id
   key_name      = aws_key_pair.kube_kp.key_name
   instance_type = "t3.medium"
   network_interface {
     device_index         = 0
     network_interface_id = aws_network_interface.kubenode[each.value].id
+  }
+  root_block_device {
+    volume_size = 10
+    volume_type = "gp2"
   }
   tags = {
     "Name" = each.value
@@ -75,13 +79,17 @@ resource "aws_instance" "kubenode" {
 # The user_data will set the hostname and entries for
 # all nodes in /etc/hosts
 resource "aws_instance" "student_node" {
-  ami           = data.aws_ami.ubuntu.image_id
+  ami           = data.aws_ami.debian.image_id
   instance_type = "t3.small"
   key_name      = aws_key_pair.kube_kp.key_name
   vpc_security_group_ids = [
     aws_security_group.student_node.id,
     aws_security_group.egress_all.id
   ]
+  root_block_device {
+    volume_size = 10
+    volume_type = "gp2"
+  }
   tags = {
     "Name" = "student_node"
   }
