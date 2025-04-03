@@ -73,7 +73,7 @@ resource "aws_instance" "kubenode" {
               ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
               echo "PRIMARY_IP=$(ip route | grep default | awk '{ print $9 }')" >> /etc/environment
-              sed -i's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+              sed -i 's/^#PermitRootLogin.*/PermitRootLogin without-password/' /etc/ssh/sshd_config
               systemctl restart sshd
               EOT
 }
@@ -102,6 +102,11 @@ resource "aws_instance" "student_node" {
               echo "${tls_private_key.key_pair.private_key_pem}" > /root/.ssh/id_rsa
               chown root:root /root/.ssh/id_rsa
               chmod 600 /root/.ssh/id_rsa
+
+              echo "${tls_private_key.key_pair.private_key_pem}" > /home/ubuntu/.ssh/id_rsa
+              chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
+              chmod 600 /home/ubuntu/.ssh/id_rsa
+
               curl -sS https://starship.rs/install.sh | sh -s -- -y
               echo 'eval "$(starship init bash)"' >> /root/.bashrc
               cat <<EOF >> /etc/hosts
@@ -110,7 +115,7 @@ resource "aws_instance" "student_node" {
               ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
 
-              sed -i's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+              sed -i 's/^#PermitRootLogin.*/PermitRootLogin without-password/' /etc/ssh/sshd_config
               systemctl restart sshd
               EOT
 }
