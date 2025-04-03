@@ -71,6 +71,7 @@ resource "aws_instance" "kubenode" {
               ${aws_network_interface.kubenode["node01"].private_ip} node01.kubernetes.local node01
               ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
+              sed -i 's/^127.0.1.1.*/127.0.1.1\t${each.value}.kubernetes.local ${each.value}/' /etc/hosts
               echo "PRIMARY_IP=$(ip route | grep default | awk '{ print $9 }')" >> /etc/environment
               EOT
 }
