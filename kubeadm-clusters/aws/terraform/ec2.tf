@@ -65,14 +65,16 @@ resource "aws_instance" "kubenode" {
   }
   user_data = <<-EOT
               #!/usr/bin/env bash
+              
               hostnamectl set-hostname ${each.value}
               cat <<EOF >> /etc/hosts
               ${aws_network_interface.kubenode["controlplane"].private_ip} controlplane.kubernetes.local controlplane
               ${aws_network_interface.kubenode["node01"].private_ip} node01.kubernetes.local node01
               ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
-              sed -i 's/^127.0.1.1.*/127.0.1.1\t${each.value}.kubernetes.local ${each.value}/' /etc/hosts
               echo "PRIMARY_IP=$(ip route | grep default | awk '{ print $9 }')" >> /etc/environment
+              sed -i's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+              systemctl restart sshd
               EOT
 }
 
@@ -97,16 +99,19 @@ resource "aws_instance" "student_node" {
   user_data = <<-EOT
               #!/usr/bin/env bash
               hostnamectl set-hostname "student-node"
-              echo "${tls_private_key.key_pair.private_key_pem}" > /home/ubuntu/.ssh/id_rsa
-              chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
-              chmod 600 /home/ubuntu/.ssh/id_rsa
+              echo "${tls_private_key.key_pair.private_key_pem}" > /root/.ssh/id_rsa
+              chown root:root /root/.ssh/id_rsa
+              chmod 600 /root/.ssh/id_rsa
               curl -sS https://starship.rs/install.sh | sh -s -- -y
-              echo 'eval "$(starship init bash)"' >> /home/ubuntu/.bashrc
+              echo 'eval "$(starship init bash)"' >> /root/.bashrc
               cat <<EOF >> /etc/hosts
               ${aws_network_interface.kubenode["controlplane"].private_ip} controlplane.kubernetes.local controlplane
               ${aws_network_interface.kubenode["node01"].private_ip} node01.kubernetes.local node01
               ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
+
+              sed -i's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+              systemctl restart sshd
               EOT
 }
 
