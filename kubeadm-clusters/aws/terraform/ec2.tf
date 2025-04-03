@@ -67,9 +67,9 @@ resource "aws_instance" "kubenode" {
               #!/usr/bin/env bash
               hostnamectl set-hostname ${each.value}
               cat <<EOF >> /etc/hosts
-              ${aws_network_interface.kubenode["controlplane"].private_ip} controlplane
-              ${aws_network_interface.kubenode["node01"].private_ip} node01
-              ${aws_network_interface.kubenode["node02"].private_ip} node02
+              ${aws_network_interface.kubenode["controlplane"].private_ip} controlplane.kubernetes.local controlplane
+              ${aws_network_interface.kubenode["node01"].private_ip} node01.kubernetes.local node01
+              ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
               echo "PRIMARY_IP=$(ip route | grep default | awk '{ print $9 }')" >> /etc/environment
               EOT
@@ -102,9 +102,9 @@ resource "aws_instance" "student_node" {
               curl -sS https://starship.rs/install.sh | sh -s -- -y
               echo 'eval "$(starship init bash)"' >> /home/ubuntu/.bashrc
               cat <<EOF >> /etc/hosts
-              ${aws_network_interface.kubenode["controlplane"].private_ip} controlplane
-              ${aws_network_interface.kubenode["node01"].private_ip} node01
-              ${aws_network_interface.kubenode["node02"].private_ip} node02
+              ${aws_network_interface.kubenode["controlplane"].private_ip} controlplane.kubernetes.local controlplane
+              ${aws_network_interface.kubenode["node01"].private_ip} node01.kubernetes.local node01
+              ${aws_network_interface.kubenode["node02"].private_ip} node02.kubernetes.local node02
               EOF
               EOT
 }
